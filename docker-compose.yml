@@ -1,0 +1,47 @@
+# docker-compose.yml
+services:
+  
+  # server
+  project-server:
+    build:
+      # location of Dockerfile
+      context: ./server
+    container_name: project-server
+    # set the user ID to match our user
+    user: "1000"
+    networks:
+      - project-network
+      # allow external connections (remove this in production)
+      - default
+    volumes:
+      # mount code into container
+      - ./server:/app/server
+      # maintain existing node_modules in container
+      - /app/server/node_modules
+  
+  # client
+  project-client:
+    build:
+      # location of Dockerfile
+      context: ./client
+    container_name: project-client
+    # set the user ID to match our user
+    user: "1000"
+    depends_on:
+      # requires server to start
+      - project-server
+    networks:
+      - project-network
+      # allow external connections
+      - default
+    volumes:
+      # mount code into container
+      - ./client:/app/client
+      # maintain existing node_modules in container
+      - /app/client/node_modules
+
+networks:
+  # internal Docker network for project
+  project-network:
+    name: project-network
+    internal: true
